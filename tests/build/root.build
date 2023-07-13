@@ -2,10 +2,10 @@ cxx.std = latest
 
 using cxx
 
-hxx{*}: extension = hxx
-ixx{*}: extension = ixx
-txx{*}: extension = txx
-cxx{*}: extension = cxx
+hxx{*}: extension = hpp
+ixx{*}: extension = ipp
+txx{*}: extension = tpp
+cxx{*}: extension = cpp
 
 # Assume headers are importable unless stated otherwise.
 #

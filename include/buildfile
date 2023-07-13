@@ -1,0 +1,11 @@
+pub_hdrs = {hxx ixx}{**}
+
+./: $pub_hdrs
+
+# Install into, say, /usr/include/, recreating subdirectories.
+#
+{hxx ixx}{*}:
+{
+  install         = include/
+  install.subdirs = true
+}

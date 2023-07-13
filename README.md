@@ -1,3 +1,0 @@
-# libasio
-
-C++ library

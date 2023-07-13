@@ -1,13 +1,20 @@
 : 1
 name: libasio
-version: 0.1.0-a.0.z
+version: 1.28.0-a.0.z
 language: c++
-summary: asio C++ library
-license: other: proprietary ; Not free/open source.
-description-file: README.md
-url: https://example.org/libasio
-email: francois@codesynthesis.com
-#build-error-email: francois@codesynthesis.com
+summary: Cross-platform C++ library for asynchronous network programming
+license: BSL-1.0 ; Boost Software License 1.0.
+description-file: README
+package-description-file: PACKAGE-README.md
+url: https://think-async.com/Asio/
+src-url: https://github.com/chriskohlhoff/asio/
+package-url: https://github.com/build2-packaging/libasio/
+email: https://sourceforge.net/p/asio/mailman/asio-users/ ; Mailing list.
+package-email: packaging@build2.org ; Mailing list.
+build-error-email: builds@build2.org
 depends: * build2 >= 0.16.0
 depends: * bpkg >= 0.16.0
-#depends: libhello ^1.0.0
+depends: libssl >= 1.1.1 ? ($config.libasio.ssl)
+depends: libcrypto >= 1.1.1 ? ($config.libasio.ssl)
+
+ssl-build-config: config.libasio.ssl=true ; Enable SSL support.

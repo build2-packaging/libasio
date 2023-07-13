@@ -1,3 +1,6 @@
-import libs = libasio%lib{asio}
+import! [metadata, rule_hint=cxx.link] asio = libasio%lib{asio}
 
-exe{driver}: cxx{driver} $libs
+exe{driver}: cxx{driver} $asio
+
+if $($asio: libasio.ssl)
+  cxx.poptions += "-DBUILD2_LIBASIO_SSL_ENABLED"

@@ -1,0 +1,3 @@
+import libs = libasio%lib{asio}
+
+exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}

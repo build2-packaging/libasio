@@ -1,3 +1,9 @@
-import libs = libasio%lib{asio}
+import! [metadata, rule_hint=cxx.link] asio = libasio%lib{asio}
 
-exe{driver}: cxx{driver} $libs
+exe{driver}: cxx{driver} $asio
+
+if ($cxx.target.class == 'windows')
+  cxx.poptions += -D_WIN32_WINNT=0x0601
+
+if $($asio: libasio.ssl)
+  cxx.poptions += "-DLIBASIO_TESTS_SSL_ENABLED"

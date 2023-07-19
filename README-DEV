@@ -1,0 +1,60 @@
+1. Boost dependencies
+
+Personally I found the online documentation to be unclear on this question, so
+here are the facts based on the source code and the upstream build.
+
+The source code includes headers (conditionally) from the following Boost
+libraries:
+
+Boost.Align
+Boost.Array
+Boost.Assert
+Boost.Bind
+Boost.Chrono
+Boost.Config
+Boost.Context
+Boost.Coroutine
+Boost.DateTime
+Boost.Detail
+Boost.Exception
+Boost.Function
+Boost.Limits
+Boost.MakeShared
+Boost.Regex
+Boost.SmartPtr
+Boost.ThrowException
+Boost.TypeTraits
+Boost.Units
+Boost.Utility
+
+Most, but not all, of the Boost dependencies have a user-visible controlling
+macro, ASIO_DISABLE_BOOST_<library>.
+
+If Asio is built in standalone mode (which is turned on automatically if a
+C++11-capable compiler is detected) "most of Asio may now be used without a
+dependency on Boost header files or libraries". Note that "standalone mode" is
+not the same as a "non-Boost version of the library". In other words, the
+non-Boost version of the library can in turn be in standalone mode.
+
+In standalone mode most of the Boost dependencies are disabled directly via
+their controlling macros (in asio/detail/config.hpp), but the following ones
+are not:
+
+Boost.Context
+Boost.Coroutine
+Boost.Detail
+Boost.Exception
+Boost.Function
+Boost.SmartPtr
+Boost.TypeTraits
+Boost.Utility
+
+Some of these are enabled based on platform and feature check macros. For
+example, Boost.TypeTraits headers will be included if <type_traits> is not
+available. Others, like Boost.Coroutine, can be controlled independently of
+ASIO_STANDALONE (in this case via ASIO_DISABLE_BOOST_COROUTINE or the upstream
+--enable-boost-coroutine configure option).
+
+Currently we force the standalone mode and then disable the rest of the Boost
+dependencies. Currently this is not configurable but in the future we may
+change that.

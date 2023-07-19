@@ -2,10 +2,11 @@
 # compile the library to their example and test programs. Therefore export
 # everything.
 #
+intf_libs =
 
 if $config.libasio.ssl
 {
-  import intf_libs  = libssl%lib{ssl}
+  import intf_libs += libssl%lib{ssl}
   import intf_libs += libcrypto%lib{crypto}
 }
 
@@ -68,15 +69,14 @@ src_pfx_inc = [dir_path] $src_root/include/
 #                               support is turned on in config.hpp unless it's
 #                               explicitly been disabled.
 #
-cxx.poptions =+ "-I$src_pfx_inc"                        \
-                 -DASIO_STANDALONE                      \
-                 -DASIO_DISABLE_BOOST_CONTEXT_FIBER     \
-                 -DASIO_DISABLE_BOOST_COROUTINE
+poptions = "-I$src_pfx_inc"                       \
+           -DASIO_STANDALONE                      \
+           -DASIO_DISABLE_BOOST_CONTEXT_FIBER     \
+           -DASIO_DISABLE_BOOST_COROUTINE
 
-# Macros and libraries that are used here and exported.
+# Macros and libraries that are used during the build and exported.
 #
-poptions_win = -DASIO_NO_DEFAULT_LINKED_LIBS \
-               -D_WIN32_WINNT=0x0601 # Windows 7
+poptions_win = -DASIO_NO_DEFAULT_LINKED_LIBS
 
 sys_libs_nonwin = -pthread
 
@@ -90,9 +90,15 @@ sys_libs_mingw = -lbcrypt  \
                  -lmswsock \
                  -lws2_32
 
+cxx.poptions =+ $poptions
+
 if $windows
 {
   cxx.poptions += $poptions_win
+
+  # Note: cannot export this.
+  #
+  cxx.poptions += -D_WIN32_WINNT=0x0601 # Windows 7.
 
   if ($cxx.target.system == 'mingw32')
   {
@@ -116,16 +122,12 @@ else
     lib{asio}: cxx.libs += $sys_libs_linux
 }
 
-objs{*}: cxx.poptions += -DASIO_DYN_LINK
 obja{*}: cxx.poptions += -DASIO_SEPARATE_COMPILATION
+objs{*}: cxx.poptions += -DASIO_DYN_LINK # Assumes separate compilation.
 
 # Export options.
 #
-lib{asio}: cxx.export.poptions = "-I$src_pfx_inc"                       \
-                                  -DASIO_STANDALONE                     \
-                                  -DASIO_DISABLE_BOOST_CONTEXT_FIBER    \
-                                  -DASIO_DISABLE_BOOST_COROUTINE
-
+lib{asio}: cxx.export.poptions = $poptions
 lib{asio}: cxx.export.libs += $intf_libs
 
 if $windows
@@ -145,8 +147,8 @@ else
     lib{asio}: cxx.export.libs += $sys_libs_linux
 }
 
-libs{asio}: cxx.export.poptions += -DASIO_DYN_LINK
 liba{asio}: cxx.export.poptions += -DASIO_SEPARATE_COMPILATION
+libs{asio}: cxx.export.poptions += -DASIO_DYN_LINK
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module

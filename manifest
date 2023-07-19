@@ -2,9 +2,10 @@
 name: libasio
 version: 1.28.0-a.0.z
 language: c++
-summary: A cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ approach.
+summary: Cross-platform C++ library for asynchronous network programming
 license: BSL-1.0 ; Boost Software License 1.0.
-description-file: README.md
+description-file: README
+package-description-file: PACKAGE-README.md
 url: https://think-async.com/Asio/
 src-url: https://github.com/chriskohlhoff/asio/
 package-url: https://github.com/build2-packaging/libasio/

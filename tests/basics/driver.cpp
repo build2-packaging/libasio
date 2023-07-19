@@ -13,7 +13,7 @@
 #include <asio/local/datagram_protocol.hpp>
 #include <asio/local/stream_protocol.hpp>
 
-#ifdef BUILD2_LIBASIO_SSL_ENABLED
+#ifdef LIBASIO_TESTS_SSL_ENABLED
 #include <asio/ssl.hpp>
 #endif
 
@@ -46,7 +46,7 @@ main ()
     sp::socket s8 (io_context);
     local::connect_pair (s7, s8, ec1);
 
-#ifdef BUILD2_LIBASIO_SSL_ENABLED
+#ifdef LIBASIO_TESTS_SSL_ENABLED
     asio::ssl::context ssl_ctx (asio::ssl::context::sslv23);
 #endif
   }

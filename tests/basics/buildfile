@@ -3,4 +3,6 @@ import! [metadata, rule_hint=cxx.link] asio = libasio%lib{asio}
 exe{driver}: cxx{driver} $asio
 
 if $($asio: libasio.ssl)
-  cxx.poptions += "-DBUILD2_LIBASIO_SSL_ENABLED"
+  cxx.poptions += "-DLIBASIO_TESTS_SSL_ENABLED"
+
+# @@ Do we need -D_WIN32_WINNT=0x0601?

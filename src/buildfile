@@ -100,8 +100,8 @@ if $windows
   {
     # Note: cannot export this.
     #
-    # @@ TMP Might the client choosing a different value not cause breakage?
-    #        Looks like this value is used in lots of headers.
+    # @@ Might the client choosing a different value not cause breakage? Looks
+    #    like this value is used in lots of headers.
     #
     cxx.poptions += -D_WIN32_WINNT=0x0601 # Windows 7 or later.
 

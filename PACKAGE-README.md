@@ -35,5 +35,5 @@ libasio ^1.28.0
 Note that on some platforms (such as MinGW) it may be necessary for
 applications to define `_WIN32_WINNT` to an appropriate value. If it's not
 defined the library's `config.hpp` header will issue a warning and choose a
-default (currently `0x0601`, meaning Windows 7 and later; this also the
+default (currently `0x0601`, meaning Windows 7 and later; this is also the
 value that the library is built with).

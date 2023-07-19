@@ -1,10 +1,30 @@
-intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
+# Note: The upstream build passes all macros, options, and libraries used to
+# compile the library to their example and test programs. Therefore export
+# everything.
+#
+intf_libs =
+
+if $config.libasio.ssl
+{
+  import intf_libs += libssl%lib{ssl}
+  import intf_libs += libcrypto%lib{crypto}
+}
+
+windows = ($cxx.target.class == 'windows')
+linux   = ($cxx.target.class == 'linux')
+
+# Metadata.
+#
+lib{asio}:
+{
+  export.metadata = 1 libasio
+
+  libasio.ssl = [bool] $config.libasio.ssl
+}
 
 # Public headers.
 #
-pub = [dir_path] ../include/asio/
+pub = [dir_path] ../include/
 
 include $pub
 
@@ -12,33 +32,126 @@ pub_hdrs = $($pub/ pub_hdrs)
 
 lib{asio}: $pub/{$pub_hdrs}
 
-# Private headers and sources as well as dependencies.
+# Source files.
 #
-lib{asio}: {hxx ixx txx cxx}{**} $impl_libs $intf_libs
+lib{asio}: cxx{asio}
+
+lib{asio}: cxx{asio_ssl}: include = $config.libasio.ssl
+
+# Libraries.
+#
+lib{asio}: $intf_libs
 
 # Build options.
 #
-out_pfx_inc = [dir_path] $out_root/include/
 src_pfx_inc = [dir_path] $src_root/include/
-out_pfx_src = [dir_path] $out_root/src/
-src_pfx_src = [dir_path] $src_root/src/
 
-cxx.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
-                "-I$out_pfx_inc" "-I$src_pfx_inc"
+# ASIO_STANDALONE: Disables Boost dependencies (but not all of them; see
+#                  README-DEV).
+#
+# ASIO_SEPARATE_COMPILATION: Turns off header-only mode. (Essentially this
+#                            disables the inclusion of .ipp files in headers.)
+#
+# ASIO_DYN_LINK: In addition to turning off header-only mode, on Windows
+#                defines ASIO_DECL to `__declspec(dllimport)` if ASIO_SOURCE
+#                is defined, and `__declspec(dllexport)` otherwise.
+#
+# ASIO_NO_DEFAULT_LINKED_LIBS: Disable auto-linking on Windows.
+#
+# The following macros disable Boost dependencies that are enabled
+# independently of ASIO_STANDALONE by the upstream build.
+#
+# ASIO_DISABLE_BOOST_CONTEXT_FIBER: Disable Boost.Context explicitly because
+#                                   support is turned on in config.hpp if the
+#                                   compiler is modern enough.
+#
+# ASIO_DISABLE_BOOST_COROUTINE: Disable Boost.Coroutine explicitly because
+#                               support is turned on in config.hpp unless it's
+#                               explicitly been disabled.
+#
+poptions = "-I$src_pfx_inc"                       \
+           -DASIO_STANDALONE                      \
+           -DASIO_DISABLE_BOOST_CONTEXT_FIBER     \
+           -DASIO_DISABLE_BOOST_COROUTINE
 
-{hbmia obja}{*}: cxx.poptions += -DASIO_STATIC_BUILD
-{hbmis objs}{*}: cxx.poptions += -DASIO_SHARED_BUILD
+# Macros and libraries that are used during the build and exported.
+#
+poptions_win = -DASIO_NO_DEFAULT_LINKED_LIBS
+
+sys_libs_nonwin = -pthread
+
+sys_libs_linux = -lrt
+
+sys_libs_win = bcrypt.lib  \
+               mswsock.lib \
+               ws2_32.lib
+
+sys_libs_mingw = -lbcrypt  \
+                 -lmswsock \
+                 -lws2_32
+
+cxx.poptions =+ $poptions
+
+if $windows
+{
+  cxx.poptions += $poptions_win
+
+  # Note: cannot export this.
+  #
+  # @@ Might the client choosing a different value not cause breakage? Looks
+  #    like this value is used in lots of headers.
+  #
+  cxx.poptions += -D_WIN32_WINNT=0x0601 # Windows 7 or later.
+
+  if ($cxx.target.system == 'mingw32')
+  {
+    obj{*}: cxx.coptions += -mthreads # Support thread-safe exception handling.
+
+    lib{asio}:
+    {
+      cxx.loptions += -mthreads
+
+      cxx.libs += $sys_libs_mingw
+    }
+  }
+  else
+    lib{asio}: cxx.libs += $sys_libs_win
+}
+else
+{
+  lib{asio}: cxx.libs += $sys_libs_nonwin
+
+  if $linux
+    lib{asio}: cxx.libs += $sys_libs_linux
+}
+
+obja{*}: cxx.poptions += -DASIO_SEPARATE_COMPILATION
+objs{*}: cxx.poptions += -DASIO_DYN_LINK # Assumes separate compilation.
 
 # Export options.
 #
-lib{asio}:
+lib{asio}: cxx.export.poptions = $poptions
+lib{asio}: cxx.export.libs += $intf_libs
+
+if $windows
 {
-  cxx.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  cxx.export.libs = $intf_libs
+  lib{asio}: cxx.export.poptions += $poptions_win
+
+  if ($cxx.target.system == 'mingw32')
+    lib{asio}: cxx.export.libs += $sys_libs_mingw
+  else
+    lib{asio}: cxx.export.libs += $sys_libs_win
+}
+else
+{
+  lib{asio}: cxx.export.libs += $sys_libs_nonwin
+
+  if $linux
+    lib{asio}: cxx.export.libs += $sys_libs_linux
 }
 
-liba{asio}: cxx.export.poptions += -DASIO_STATIC
-libs{asio}: cxx.export.poptions += -DASIO_SHARED
+liba{asio}: cxx.export.poptions += -DASIO_SEPARATE_COMPILATION
+libs{asio}: cxx.export.poptions += -DASIO_DYN_LINK
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
@@ -48,7 +161,3 @@ if $version.pre_release
   lib{asio}: bin.lib.version = "-$version.project_id"
 else
   lib{asio}: bin.lib.version = "-$version.major.$version.minor"
-
-# Don't install private headers.
-#
-{hxx ixx txx}{*}: install = false

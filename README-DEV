@@ -58,10 +58,3 @@ ASIO_STANDALONE (in this case via ASIO_DISABLE_BOOST_COROUTINE or the upstream
 Currently we force the standalone mode and then disable the rest of the Boost
 dependencies. Currently this is not configurable but in the future we may
 change that.
-
-2. TODO when upstream is upgraded
-
-@@ TODO Remove this if version-containing doc url is removed from
-        PACKAGE-README.md.
-
-- Update all version numbers in PACKAGE-README.md (URLs and examples).

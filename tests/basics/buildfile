@@ -2,7 +2,7 @@ import! [metadata, rule_hint=cxx.link] asio = libasio%lib{asio}
 
 exe{driver}: cxx{driver} $asio
 
-if ($cxx.target.system == 'mingw32')
+if ($cxx.target.class == 'windows')
   cxx.poptions += -D_WIN32_WINNT=0x0601
 
 if $($asio: libasio.ssl)

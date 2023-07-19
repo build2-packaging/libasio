@@ -96,15 +96,15 @@ if $windows
 {
   cxx.poptions += $poptions_win
 
+  # Note: cannot export this.
+  #
+  # @@ Might the client choosing a different value not cause breakage? Looks
+  #    like this value is used in lots of headers.
+  #
+  cxx.poptions += -D_WIN32_WINNT=0x0601 # Windows 7 or later.
+
   if ($cxx.target.system == 'mingw32')
   {
-    # Note: cannot export this.
-    #
-    # @@ Might the client choosing a different value not cause breakage? Looks
-    #    like this value is used in lots of headers.
-    #
-    cxx.poptions += -D_WIN32_WINNT=0x0601 # Windows 7 or later.
-
     obj{*}: cxx.coptions += -mthreads # Support thread-safe exception handling.
 
     lib{asio}:

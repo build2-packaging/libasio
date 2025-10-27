@@ -1,0 +1,6 @@
+: 1
+name: libasio
+version: 1.36.0
+language: c++
+summary: Cross-platform C++ library for asynchronous network programming
+license: BSL-1.0; Boost Software License 1.0.
